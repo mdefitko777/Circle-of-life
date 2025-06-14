@@ -158,18 +158,22 @@ class Ecosystem:
         try:
             os.system('cls' if os.name=='nt' else 'clear')
         except Exception:
-            pass  
-        cols = ''.join(f'{i:<2}' for i in range(1, GRID_SIZE+1))
-        header = f'   {cols} time step = {year}'
-        print(header)
-        print('-' * len(header))
+            pass
+        col_head = '  ' + ''.join(f'{i:3}' for i in range(1, GRID_SIZE+1))
+        print(col_head)
+        print(f'time step = {year}')
+        print('-' * len(col_head))
         for y in range(GRID_SIZE):
             row = []
             for x in range(GRID_SIZE):
-                if any(z.x==x and z.y==y for z in self.zebras): row.append('Z ')
-                elif any(l.x==x and l.y==y for l in self.lions): row.append('L ')
-                else: row.append('. ')
-            print(f'{y+1:2}|'+''.join(row)+'|')
+                if any(z.x==x and z.y==y for z in self.zebras):
+                    row.append('Z  ')
+                elif any(l.x==x and l.y==y for l in self.lions):
+                    row.append('L  ')
+                else:
+                    row.append('.  ')
+            print(f'{y+1:2}|{"".join(row)}|')
+
         zs, ls = self.stats()
         print(f'Zebras: {zs} | Lions: {ls}')
         try:
@@ -179,6 +183,7 @@ class Ecosystem:
         if cmd != '':
             print('Simulation terminated.')
             sys.exit()
+
 
 if __name__ == '__main__':
     eco = Ecosystem()
