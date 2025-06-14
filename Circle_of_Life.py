@@ -181,7 +181,7 @@ class Ecosystem:
         for row in range(area):
             line = ''.join(f'{cell:2} ' for cell in show_grid[row])
             print(f'{row:2} {line}')
-        key = input("enter [q] to quit (or Enter继续):")
+        key = input("enter [q] to quit (or Enter):")
         if key == 'q':
             exit()
 
@@ -192,6 +192,6 @@ if __name__ == '__main__':
     for year in range(1, YEARS+1):
         eco.year_pass()
         zebras, lions = eco.stat()
-        print(f'Year {year:02d}: 斑马={zebras}, 狮子={lions}')
+        print(f'Year {year:02d}: zebras={zebras}, lions={lions}')
         # 只显示左上10*10，需全图显示可改area=50
         eco.display(area=50)
