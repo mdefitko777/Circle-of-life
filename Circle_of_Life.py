@@ -161,7 +161,6 @@ class Ecosystem:
             pass
         col_head = '  ' + ''.join(f'{i:3}' for i in range(1, GRID_SIZE+1))
         print(col_head)
-        print(f'time step = {year}')
         print('-' * len(col_head))
         for y in range(GRID_SIZE):
             row = []
@@ -175,7 +174,7 @@ class Ecosystem:
             print(f'{y+1:2}|{"".join(row)}|')
 
         zs, ls = self.stats()
-        print(f'Zebras: {zs} | Lions: {ls}')
+        print(f'Zebras: {zs} | Lions: {ls} | time step = {year}')
         try:
             cmd = input('press Enter to continue, other key to quit: ')
         except EOFError:
