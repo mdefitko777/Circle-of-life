@@ -1,3 +1,25 @@
+# Circle of Life Simulation
+"""
+This module simulates a simple ecosystem with zebras and lions.
+Zebras eat grass, and lions eat zebras. The simulation runs for a specified number of years, and the state of the ecosystem is displayed at each year.
+
+Classes:
+    Cell: Represents a cell in the ecosystem that can grow grass.
+    Animal: Base class for animals in the ecosystem.
+    Zebra: A zebra in the ecosystem.
+    Lion: A lion in the ecosystem.
+    Ecosystem: Represents the ecosystem with zebras and lions.
+
+Functions:
+    None
+
+Constants:
+    GRID_SIZE: The size of the ecosystem grid.
+    INITIAL_ZEBRAS: The initial number of zebras in the ecosystem.
+    INITIAL_LIONS: The initial number of lions in the ecosystem.
+    YEARS: The number of years the simulation runs.
+
+"""
 import random
 import os
 import sys
@@ -9,22 +31,28 @@ INITIAL_LIONS = 5
 YEARS = 20
 
 class Cell:
+    """A cell in the ecosystem that can grow grass."""
     def __init__(self):
+        """Initialize a cell with grass."""
         self.grass = True
         self.regrow_timer = 0
 
     def eaten(self):
+        """A zebra eats the grass in this cell."""
         self.grass = False
         self.regrow_timer = 1
 
     def step(self):
+        """Regrow grass if it has been eaten."""
         if not self.grass:
             self.regrow_timer -= 1
             if self.regrow_timer <= 0:
                 self.grass = True
 
 class Animal:
+    """Base class for animals in the ecosystem."""
     def __init__(self, x, y):
+        """Initialize an animal at position (x, y)."""
         self.x = x
         self.y = y
         self.age = 0
@@ -32,15 +60,18 @@ class Animal:
         self.alive = True
 
     def neighbors(self):
+        """Yield coordinates of neighboring cells."""
         for dx, dy in [(-1,0),(1,0),(0,-1),(0,1)]:
             nx, ny = self.x + dx, self.y + dy
             if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
                 yield nx, ny
 
     def move(self, ecosys):
+        """Move the animal to a new position."""
         raise NotImplementedError
 
     def step(self, ecosys, newborns):
+        """Perform a step in the ecosystem."""
         if not self.alive:
             return
         self.age += 1
@@ -54,13 +85,17 @@ class Animal:
             newborns.append(baby)
 
     def dead(self):
+        """Check if the animal is dead."""
         raise NotImplementedError
 
     def breed(self):
+        """Check if the animal can breed."""
         raise NotImplementedError
 
 class Zebra(Animal):
+    """A zebra in the ecosystem."""
     def move(self, ecosys):
+        """Move the zebra to a neighboring cell with grass."""
         grass_cells = [(nx,ny) for nx,ny in self.neighbors()
                        if ecosys.cells[ny][nx].grass and not ecosys.occupied(nx,ny)]
         if grass_cells:
@@ -75,16 +110,20 @@ class Zebra(Animal):
         return False
 
     def dead(self):
+        """Check if the zebra is dead due to hunger."""
         return self.hungry >= 3
 
     def breed(self):
+        """Check if the zebra can breed."""
         if self.age >= 3:
             self.age = 0
             return Zebra(self.x, self.y)
         return None
 
 class Lion(Animal):
+    """A lion in the ecosystem."""
     def move(self, ecosys):
+        """Move the lion to a neighboring cell with a zebra."""
         prey = [(nx,ny) for nx,ny in self.neighbors()
                 if any(isinstance(a, Zebra) for a in ecosys.animals_at(nx,ny))]
         if prey:
@@ -100,16 +139,20 @@ class Lion(Animal):
         return False
 
     def dead(self):
+        """Check if the lion is dead due to hunger."""
         return self.hungry >= 5
 
     def breed(self):
+        """Check if the lion can breed."""
         if self.age >= 5:
             self.age = 0
             return Lion(self.x, self.y)
         return None
 
 class Ecosystem:
+    """The ecosystem containing grid and animals."""
     def __init__(self):
+        """Initialize the ecosystem with a grid and animals."""
         self.cells = [[Cell() for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
         self.zebras = []
         self.lions = []
@@ -117,9 +160,11 @@ class Ecosystem:
 
     @property
     def animals(self):
+        """Return a list of all animals in the ecosystem."""
         return [*self.zebras, *self.lions]
 
     def _populate(self):
+        """Populate the ecosystem with initial zebras and lions."""
         coords = [(x,y) for x in range(GRID_SIZE) for y in range(GRID_SIZE)]
         random.shuffle(coords)
         for _ in range(INITIAL_ZEBRAS):
@@ -130,15 +175,19 @@ class Ecosystem:
             self.lions.append(Lion(x,y))
 
     def occupied(self, x, y):
+        """Check if a cell at (x, y) is occupied by an animal."""
         return any(a.alive and a.x==x and a.y==y for a in self.animals)
 
     def animals_at(self, x, y):
+        """Return a list of animals at the cell (x, y)."""
         return [a for a in self.animals if a.alive and a.x==x and a.y==y]
 
     def move(self, animal, nx, ny):
+        """Move an animal to a new position (nx, ny)."""
         animal.x, animal.y = nx, ny
 
     def step(self):
+        """Perform a step in the ecosystem."""
         newborns = []
         for a in list(self.animals):
             a.step(self, newborns)
@@ -152,9 +201,11 @@ class Ecosystem:
                 cell.step()
 
     def stats(self):
+        """Return the current statistics of zebras and lions."""
         return len(self.zebras), len(self.lions)
 
     def display(self, year):
+        """Display the current state of the ecosystem."""
         try:
             os.system('cls' if os.name=='nt' else 'clear')
         except Exception:
